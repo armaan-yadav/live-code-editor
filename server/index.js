@@ -1,11 +1,13 @@
 import express from "express";
 import { Server } from "socket.io";
 import http from "http";
+import cors from "cors";
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 const port = process.env.PORT || 5000;
+app.use(cors());
 
 const userSocketMap = {};
 //usersocketmap -> holds all users with socketId as key and username as value
@@ -33,7 +35,7 @@ io.on("connection", (socket) => {
 
     //getting all   the clientsin the current room
     const clients = getAllClientsInRoom(roomId);
-    console.log(clients);
+    // console.log(clients);
 
     //notifying each and every cleint in the room about the new connection
     clients.forEach(({ socketId }) => {
@@ -48,7 +50,7 @@ io.on("connection", (socket) => {
   //notifying each and every client in the room that a user has left the room
   socket.on("disconnecting", () => {
     const rooms = [...socket.rooms];
-    console.log("first");
+    // console.log("first");
     rooms.forEach((roomId) => {
       socket.in(roomId).emit("disconnected", {
         socketId: socket.id,
@@ -57,6 +59,14 @@ io.on("connection", (socket) => {
     });
     delete userSocketMap[socket.id];
     socket.leave();
+  });
+  // sync the code
+  socket.on("code-change", ({ roomId, code }) => {
+    socket.in(roomId).emit("code-change", { code });
+  });
+  // when new user join the room all the code which are there are also shows on that persons editor
+  socket.on("code-sync", ({ socketId, code }) => {
+    io.to(socketId).emit("code-change", { code });
   });
 });
 

@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 import { useLocation, useNavigate } from "react-router-dom";
 import { initSocket } from "../socket";
 const Editor = () => {
+  const codeRef = useRef(null);
   const navigate = useNavigate();
   //states
   const { roomId } = useParams();
@@ -47,6 +48,11 @@ const Editor = () => {
       username !== location.state?.username &&
         toast.success(`${username} joined`);
       setUsers(clients);
+
+      socketRef.current.emit("code-sync", {
+        code: codeRef.current,
+        socketId,
+      });
     });
     //custom event->receiving data from server on disconnecting
 
@@ -82,7 +88,13 @@ const Editor = () => {
         </div>
       </div>
       <div className="h-full w-full bg-red-900">
-        <CodeEditor />
+        <CodeEditor
+          roomId={roomId}
+          socketRef={socketRef}
+          onCodeChange={(code) => {
+            codeRef.current = code;
+          }}
+        />
       </div>
     </div>
   );
