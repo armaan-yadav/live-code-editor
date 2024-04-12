@@ -22,6 +22,10 @@ const getAllClientsInRoom = (roomId) => {
   );
 };
 
+app.use("/", (req, res) => {
+  res.send("hello");
+});
+
 io.on("connection", (socket) => {
   //whenever a new connection is created in server
   console.log(`user with id ${socket.id} connected`);
