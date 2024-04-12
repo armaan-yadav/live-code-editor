@@ -9,7 +9,11 @@ const Home = () => {
     e.preventDefault();
     if (roomId == "") toast.error("Room Id is required");
     if (username == "") toast.error("Username is required");
-    roomId !== "" && username !== "" && navigate(`/editor/${roomId}`);
+    roomId !== "" &&
+      username !== "" &&
+      navigate(`/editor/${roomId}`, {
+        state: { username },
+      });
   };
   const generateNewRoomID = () => {
     setRoomId(uuidv4());
